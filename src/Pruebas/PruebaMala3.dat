@@ -1,0 +1,14 @@
+(* En esta prueba se va a comprobar la funcionalidad de un if pero NO funciona*)
+# Falla en la sintaxis de la condición if, ya que esta condición está formada de la siguiente manera:
+# if condicion then { . . .};
+# Si nos fijamos en este if falta la palabra reservada 'then'.
+
+prog ejemplo2 {
+    proc sumar (int resul:in out) {
+        int aux;
+        aux = x;
+        if aux /= 0 {
+            aux = 0;
+        };
+    }
+}

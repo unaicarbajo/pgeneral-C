@@ -1,0 +1,18 @@
+# En esta prueba se va a comprobar la funcionalidad del exit if.
+# El exit if debe tener dos "goto", el primero irá después de la expresión,
+# indicando si se cumple a que línea se debe ir (esta debe ser la de la salida del while).
+# El otro en la línea siguiente, indicando si no se cumple la expresión a donde debe ir.
+
+prog ejemplo4 {
+    proc sumar (int resul:in out) {
+        int aux;
+        aux = x;
+        while aux /= 0 loop {
+            exit if aux == 56;
+            iteraciones = iteraciones + 1;
+        }
+        finally {
+            println(iteraciones);
+        }; # fin del while
+    }
+}

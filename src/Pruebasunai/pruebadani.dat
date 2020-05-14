@@ -1,0 +1,39 @@
+prog ejemplo4 {
+    if not a > b then{
+        a = 1;
+    };
+    if a > b and b < c then{
+        a = 2;
+    };
+    if a > b or b < c then{
+        a = 3;
+    };
+    if not a > b and b < c then{
+        a = 4;
+    };
+    if a > b and not b < c then{
+        a = 5;
+    };
+    if not a > b and not b < c then{
+        a = 6;
+    };
+    if not a > b or b < c then{
+        a = 7;
+    };
+    if a > b or not b < c then{
+        a = 8;
+    };
+    if not a > b or not b < c then{
+        a = 9;
+    };
+    if not a > b and b>c or not a<d then{
+        a=10;
+    };
+    if b>c or not a<d and a>b then{
+        a=11;
+    };
+    if b>c or not a<d and a>b then{
+        a=11;
+    };
+}
+    

@@ -1,0 +1,14 @@
+# En esta prueba se va a comprobar la funcionalidad del if.
+# El if debe tener dos "goto", el primero irá después de la expresión,
+# indicando si se cumple a que línea se debe ir. El otro en la línea siguiente,
+# indicando si no se cumple la expresión a donde debe ir.
+
+prog ejemplo2 {
+    proc sumar (int resul:in out) {
+        int aux;
+        aux = x;
+        if aux /= 0 then {
+            aux = 0;
+        };
+    }
+}

@@ -1,0 +1,30 @@
+# Esto es una prueba general que va a fallar en el comentario de la linea 6 ya que está mal formado.
+
+prog ejemplo {
+    int a,b,c ;
+    float d,e ;
+    (* esto es un comentario mal formado*)( *)
+    proc sumar ( int x,y: in; int resul:in out) {
+        int aux;
+        aux = x;
+        resul = y;
+        if resul < 1000 then {
+            int iteraciones;
+            iteraciones = 0;
+            while aux /= 0 loop {
+                resul = resul + 1;
+                exit if resul > 1000000 ;
+                aux = aux - 1;
+                iteraciones = iteraciones + 1;
+            }
+            finally {
+            println(iteraciones);
+            }; # fin del while
+        }; # fin del if
+    }
+    read(a);
+    read(b);
+    d= 1/b;
+    #sumar(a,b,c); (* los que hagan llamadas a procedimientos *)
+    c= c*(c*d)+e;
+}

@@ -1,0 +1,14 @@
+(* En esta prueba se va a comprobar la funcionalidad de un while pero NO funciona*)
+# Falla en la condicion del while ya que pone '=' y no está contemplada esa opción.
+prog ejemplo2 {
+    proc sumar (int resul:in out) {
+        int aux;
+        aux = x;
+        while aux = 0 loop {
+            iteraciones = iteraciones + 1;
+        }
+        finally {
+            println(iteraciones);
+        }; # fin del while
+    }
+}

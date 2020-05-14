@@ -1,0 +1,17 @@
+# En esta prueba se comprueba la funcionalidad del 'exit if' y NO debería funcionar en este fichero.
+# Se ha generado una clausula 'exit if' sin la condición que se tiene que cumplir para que salga del bucle, es decir,
+# deberia ser 'exit if condicion ;' y salir del bucle en caso de que se cumpla la condición.
+
+prog ejemplo4 {
+    proc sumar (int resul:in out) {
+        int aux;
+        aux = x;
+        while aux /= 0 loop {
+            exit if ;
+            iteraciones = iteraciones + 1;
+        }
+        finally {
+            println(iteraciones);
+        }; # fin del while
+    }
+}
