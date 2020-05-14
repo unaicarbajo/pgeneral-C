@@ -1635,11 +1635,11 @@ yyreduce:
 #line 188 "parser.y" /* yacc.c:1652  */
     {(yyval.sent) = new sentenciastruct;
                       if ((yyvsp[-11].sent)->tipo != "asignacion")
-                        yyerror("Error semántico. El primer elemento debe ser una asignación.");
+                        yyerror("Error semántico. El primer elemento del for debe ser una asignación.");
                       else if ((yyvsp[-6].sent)->tipo != "asignacion")
-                        yyerror("Error semántico. El tercer elemento debe ser una asignación.");
+                        yyerror("Error semántico. El tercer elemento del for debe ser una asignación.");
                       else if ((yyvsp[-9].expr)->tipo != "comparacion" && (yyvsp[-9].expr)->tipo != "booleano")
-                        yyerror("Error semántico. El segundo elemento debe ser una expresión de comparación o booleana.");
+                        yyerror("Error semántico. El segundo elemento del for debe ser una expresión de comparación o booleana.");
                       // TODO los correspondiente a la tabla de símbolos.
                       // Está previamente declarada la variable? Error.
                       else{
