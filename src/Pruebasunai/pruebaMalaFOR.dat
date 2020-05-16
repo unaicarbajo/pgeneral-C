@@ -1,7 +1,6 @@
-# Es una prueba buena donde se define la variable i dentro de ambos for.
-# Lo que ocurre es que ambos for están definidos integramente dentro de dos
-# procedure distintos, y no se redefinen dentro por lo que no hay problema 
-# en redefinirla
+# Es una prueba buena donde se define la variable i dentro de un for (cabecera for)
+# pero la variable i ha sido definida previamente dentro dentro de su procedure
+# por lo que salta error semántico
 
 prog ejemplo4 {
      proc sumar ( int x,y: in; int resul:in out) {

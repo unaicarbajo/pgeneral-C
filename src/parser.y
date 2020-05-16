@@ -13,9 +13,9 @@
    extern int yylineno;
    extern char *yytext;
    void yyerror (const char *msg) {
-     printf("\033[0;31m");
+     printf(RED);
      printf("line %d: %s at '%s'\n", yylineno, msg, yytext) ;
-     printf("\033[0m"); 
+     printf(RESET); 
    }
 
 
@@ -212,7 +212,7 @@ sentencia : variable TASSIG expresion TSEMIC {
 											codigo.anadirInstruccion("write "+ $3->str + ";");
 											codigo.anadirInstruccion("writeln;");}
       
-      | RFOR TPARA tipo variable TASSIG expresion 
+      | RFOR TPARA tipo variable 
                           { TablaSimbolos st = stPila.desempilar();
                           try{
                             st.anadirVariable(*$4,*$3);
@@ -222,26 +222,25 @@ sentencia : variable TASSIG expresion TSEMIC {
                             yyerror(cstr);
                           }
                           codigo.anadirInstruccion(*$3+" "+*$4+";");
-                          codigo.anadirInstruccion(*$4+" "+*$5+" "+$6->str);
                           stPila.empilar(st);}
-      
-      TSEMIC  M expresion TSEMIC M sentencia M {codigo.anadirInstruccion("goto");}  TPARC RLOOP bloque M TSEMIC
+      TASSIG expresion {codigo.anadirInstruccion(*$4+" "+*$6+" "+$7->str);} TSEMIC
+      M expresion TSEMIC M sentencia M {codigo.anadirInstruccion("goto");}  TPARC RLOOP bloque M TSEMIC
                       {$$ = new sentenciastruct;
-                      if ($13->tipo != "asignacion")
+                      if ($14->tipo != "asignacion")
                         yyerror("Error semántico. El tercer elemento del for debe ser una asignación.");
-                      else if ($10->tipo != "comparacion" && $10->tipo != "booleano")
+                      else if ($11->tipo != "comparacion" && $11->tipo != "booleano")
                         yyerror("Error semántico. El segundo elemento del for debe ser una expresión de comparación o booleana.");
                       // TODO los correspondiente a la tabla de símbolos
                       // Está previamente declarada la variable? Error.
                       else{
                           codigo.anadirInstruccion("goto");
-                          vector<int> tmp1 ; tmp1.push_back($14) ;
-                          codigo.completarInstrucciones(tmp1, $9) ;
-                          tmp1.clear(); tmp1.push_back($19) ;
-                          codigo.completarInstrucciones(tmp1, $12) ;
-                          codigo.completarInstrucciones($10->trues,$14+1) ;
-                          codigo.completarInstrucciones($10->falses, $19+1) ;
-                          codigo.completarInstrucciones($18->exits, $19+1);
+                          vector<int> tmp1 ; tmp1.push_back($15) ;
+                          codigo.completarInstrucciones(tmp1, $10) ;
+                          tmp1.clear(); tmp1.push_back($20) ;
+                          codigo.completarInstrucciones(tmp1, $13) ;
+                          codigo.completarInstrucciones($11->trues,$15+1) ;
+                          codigo.completarInstrucciones($11->falses, $20+1) ;
+                          codigo.completarInstrucciones($19->exits, $20+1);
 					                $$->exits.clear();
                         }
                       }
