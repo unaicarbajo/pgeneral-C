@@ -26,6 +26,7 @@
    expresionstruct makearithmetic(std::string &s1, std::string &s2, std::string &s3) ;
    void makeboolean(std::string &s1, std::string &s2, std::string &s3);
    vector<int> *unir(vector<int> lis1, vector<int> lis2);
+   TablaSimbolos anadirVariablesTabla(vector<string> &idNombres, string &tipoNombre, TablaSimbolos &tabla);
    Codigo codigo;
    PilaTablaSimbolos stPila;
 %}
@@ -78,22 +79,30 @@
 
 %%
 
-programa : RPROGRAM TID {codigo.anadirInstruccion(*$1 + " " + *$2 + ";");
-                          TablaSimbolos st; stPila.empilar(st);} 
+programa : RPROGRAM TID {codigo.anadirInstruccion(*$1 + " " + *$2 + ";");}
             bloqueppl {codigo.anadirInstruccion("halt;");
-                      codigo.escribir();}
+                      codigo.escribir();
+                      }
          ;
 
-bloqueppl :  TLLAVEA declaraciones
-         decl_de_subprogs
-	   lista_de_sentencias
-	   TLLAVEC
-         ;
+bloqueppl :  TLLAVEA 
+            {TablaSimbolos st;
+            stPila.empilar(st);}
+            declaraciones
+            decl_de_subprogs
+	          lista_de_sentencias
+	          TLLAVEC
+            {stPila.desempilar();}
+          ;
 
 bloque : TLLAVEA declaraciones lista_de_sentencias TLLAVEC { $$ = new sentenciastruct; $$->exits = $3->exits; }
             ;
 
-declaraciones :   tipo lista_de_ident TSEMIC { codigo.anadirDeclaraciones(*$2 , *$1); } declaraciones
+declaraciones :   tipo lista_de_ident TSEMIC { codigo.anadirDeclaraciones(*$2 , *$1);
+                                                TablaSimbolos tabla = stPila.desempilar();
+                                                tabla = anadirVariablesTabla(*$2, *$1, tabla);
+                                                stPila.empilar(tabla);
+                                                 } declaraciones
                   | /*vacio*/
                   ;
 lista_de_ident : TID resto_lista_id {$$  = $2 ;
@@ -113,15 +122,32 @@ decl_de_subprogs : decl_de_subprograma decl_de_subprogs
             | /*vacio*/ {}
             ;
 
-decl_de_subprograma :   RPROC TID {codigo.anadirInstruccion(*$1 +" "+ *$2);} argumentos bloqueppl 
-                                    {codigo.anadirInstruccion("endproc;");}
+decl_de_subprograma :   RPROC TID {codigo.anadirInstruccion(*$1 +" "+ *$2);}
+                          {TablaSimbolos stPadre = stPila.desempilar();
+                          stPadre.anadirProcedimiento(*$2);
+                          stPila.empilar(stPadre);
+                          TablaSimbolos st;
+                          stPila.empilar(st);}
+
+                          argumentos
+                          bloqueppl
+
+                         {codigo.anadirInstruccion("endproc;");
+                         stPila.desempilar();}
                      ;
 
 argumentos :TPARA lista_de_param TPARC
             | /*vacio*/
             ;
 
-lista_de_param : tipo lista_de_ident TCOL clase_par {codigo.anadirParametros(*$2, *$4, *$1 ); } resto_lis_de_param   ;
+lista_de_param : tipo lista_de_ident TCOL clase_par {codigo.anadirParametros(*$2, *$4, *$1 ); } 
+
+                {TablaSimbolos st;
+                 st = stPila.desempilar();
+                 // DE MOMENTO LAS AÑADO COMO VARIABLES NORMALES
+                 st = anadirVariablesTabla(*$2, *$1, st);
+                 stPila.empilar(st);}
+                resto_lis_de_param   ;
 
 clase_par : RIN   { $$ = new std::string("in");}
       | ROUT      { $$ = new std::string("out");}
@@ -184,7 +210,7 @@ sentencia : variable TASSIG expresion TSEMIC {
 											codigo.anadirInstruccion("write "+ $3->str + ";");
 											codigo.anadirInstruccion("writeln;");}
       
-      | RFOR TPARA sentencia M expresion TSEMIC M sentencia M {codigo.anadirInstruccion("goto");}  TPARC RLOOP bloque M
+      | RFOR TPARA sentencia M expresion TSEMIC M sentencia M {codigo.anadirInstruccion("goto");}  TPARC RLOOP bloque M TSEMIC
                       {$$ = new sentenciastruct;
                       if ($3->tipo != "asignacion")
                         yyerror("Error semántico. El primer elemento del for debe ser una asignación.");
@@ -195,6 +221,7 @@ sentencia : variable TASSIG expresion TSEMIC {
                       // TODO los correspondiente a la tabla de símbolos.
                       // Está previamente declarada la variable? Error.
                       else{
+                          stPila.obtenerTipo
                           codigo.anadirInstruccion("goto");
                           vector<int> tmp1 ; tmp1.push_back($9) ;
                           codigo.completarInstrucciones(tmp1, $4) ;
@@ -306,4 +333,13 @@ vector<int> *unir(vector<int> lis1, vector<int> lis2){
         nueva->insert(nueva->end(), lis2.begin(), lis2.end());
 
         return nueva;
+}
+
+TablaSimbolos anadirVariablesTabla(vector<string> &idNombres,  string &tipoNombre, TablaSimbolos &tabla) {
+  vector<string>::const_iterator iter;
+  for (iter=idNombres.end()-1; iter!=idNombres.begin()-1; iter--) {
+    //anadirInstruccion(tipoNombre + " " + *iter + ";");
+    tabla.anadirVariable(*iter, tipoNombre);
+  }
+  return tabla;
 }

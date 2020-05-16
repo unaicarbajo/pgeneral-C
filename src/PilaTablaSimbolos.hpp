@@ -49,8 +49,8 @@ public:
          * el elemento en el tope en ese momento. */
 	void empilar(const TablaSimbolos& st);
 
-	/* Borra de la pila el elemento del tope. */
-	void desempilar();
+	/* Borra de la pila el elemento del tope y lo devuelve. */
+	TablaSimbolos& desempilar();
 
 	/* Dada una variable, intenta encontrar su tipo empezando desde la tabla de símbolos en el
 	 * tope de la pila y lo devuelve, si lo encuentra. */

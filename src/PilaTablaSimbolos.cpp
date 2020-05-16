@@ -44,8 +44,10 @@ void PilaTablaSimbolos::empilar(const TablaSimbolos& st) {
 /* desempilar */
 /**************/
 
-void PilaTablaSimbolos::desempilar() {
+TablaSimbolos& PilaTablaSimbolos::desempilar() {
+	TablaSimbolos& tope = this->tope();
 	pila.pop();
+	return tope;
 }
 
 
