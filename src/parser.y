@@ -7,6 +7,8 @@
    #include <string>
    using namespace std; 
 
+   #define RED     "\033[31m" 
+   #define RESET   "\033[0m"
    extern int yylex();
    extern int yylineno;
    extern char *yytext;
@@ -210,26 +212,36 @@ sentencia : variable TASSIG expresion TSEMIC {
 											codigo.anadirInstruccion("write "+ $3->str + ";");
 											codigo.anadirInstruccion("writeln;");}
       
-      | RFOR TPARA sentencia M expresion TSEMIC M sentencia M {codigo.anadirInstruccion("goto");}  TPARC RLOOP bloque M TSEMIC
+      | RFOR TPARA tipo variable TASSIG expresion 
+                          { TablaSimbolos st = stPila.desempilar();
+                          try{
+                            st.anadirVariable(*$4,*$3);
+                          }
+                          catch(string err){
+                            const char *cstr = err.c_str();
+                            yyerror(cstr);
+                          }
+                          codigo.anadirInstruccion(*$3+" "+*$4+";");
+                          codigo.anadirInstruccion(*$4+" "+*$5+" "+$6->str);
+                          stPila.empilar(st);}
+      
+      TSEMIC  M expresion TSEMIC M sentencia M {codigo.anadirInstruccion("goto");}  TPARC RLOOP bloque M TSEMIC
                       {$$ = new sentenciastruct;
-                      if ($3->tipo != "asignacion")
-                        yyerror("Error semántico. El primer elemento del for debe ser una asignación.");
-                      else if ($8->tipo != "asignacion")
+                      if ($13->tipo != "asignacion")
                         yyerror("Error semántico. El tercer elemento del for debe ser una asignación.");
-                      else if ($5->tipo != "comparacion" && $5->tipo != "booleano")
+                      else if ($10->tipo != "comparacion" && $10->tipo != "booleano")
                         yyerror("Error semántico. El segundo elemento del for debe ser una expresión de comparación o booleana.");
-                      // TODO los correspondiente a la tabla de símbolos.
+                      // TODO los correspondiente a la tabla de símbolos
                       // Está previamente declarada la variable? Error.
                       else{
-                          stPila.obtenerTipo
                           codigo.anadirInstruccion("goto");
-                          vector<int> tmp1 ; tmp1.push_back($9) ;
-                          codigo.completarInstrucciones(tmp1, $4) ;
-                          tmp1.clear(); tmp1.push_back($14) ;
-                          codigo.completarInstrucciones(tmp1, $7) ;
-                          codigo.completarInstrucciones($5->trues,$9+1) ;
-                          codigo.completarInstrucciones($5->falses, $14+1) ;
-                          codigo.completarInstrucciones($13->exits, $14+1);
+                          vector<int> tmp1 ; tmp1.push_back($14) ;
+                          codigo.completarInstrucciones(tmp1, $9) ;
+                          tmp1.clear(); tmp1.push_back($19) ;
+                          codigo.completarInstrucciones(tmp1, $12) ;
+                          codigo.completarInstrucciones($10->trues,$14+1) ;
+                          codigo.completarInstrucciones($10->falses, $19+1) ;
+                          codigo.completarInstrucciones($18->exits, $19+1);
 					                $$->exits.clear();
                         }
                       }
@@ -302,8 +314,10 @@ expresion : expresion TEQEQ expresion     { $$ = new expresionstruct;
                                           $$->tipo = "booleano";
                                           delete $2;}
             | variable                    { $$ = new expresionstruct; $$->str = *$1; }
-            | TINTEGER                    { $$ = new expresionstruct; $$->str = *$1; }
-            | TREAL                       { $$ = new expresionstruct; $$->str = *$1; }
+            | TINTEGER                    { $$ = new expresionstruct; $$->str = *$1; 
+                                            $$->tipo = "ent";}
+            | TREAL                       { $$ = new expresionstruct; $$->str = *$1; 
+                                            $$->tipo = "real";}
             | TPARA expresion TPARC       { $$ = $2; }
             ;
 

@@ -1,5 +1,5 @@
 prog ejemplo4 {
-    for (i = 2 ; a < 2 ; i = i + 1;) loop
+    for (int i = 2 ; a < 2 ; i = i + 1;) loop
         { aux = 4;
         };
 
