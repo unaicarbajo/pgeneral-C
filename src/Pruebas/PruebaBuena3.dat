@@ -4,7 +4,7 @@
 # indicando si no se cumple la expresión a donde debe ir.
 
 prog ejemplo2 {
-    proc sumar (int resul:in out) {
+    proc sumar (int resul:in out; int prueba: in out) {
         int aux;
         aux = x;
         if aux /= 0 then {

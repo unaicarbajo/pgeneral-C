@@ -72,6 +72,10 @@ public:
 	/* Dado un Id lo borra de la T_S. */
 	void borrarId(std::string id);
 
+	std::string ultimaKey();
+
+	void print() ;
+
 };
 
 #endif /* TABLASIMBOLOS_HPP_ */

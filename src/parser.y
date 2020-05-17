@@ -28,9 +28,14 @@
    expresionstruct makearithmetic(std::string &s1, std::string &s2, std::string &s3) ;
    void makeboolean(std::string &s1, std::string &s2, std::string &s3);
    vector<int> *unir(vector<int> lis1, vector<int> lis2);
-   TablaSimbolos anadirVariablesTabla(vector<string> &idNombres, string &tipoNombre, TablaSimbolos &tabla);
+   vector<string> *unirStr(vector<string> lis1, vector<string> lis2);
+   void anadirVariablesTabla(vector<string> &idNombres, string &tipoNombre);
+   void anadirParametrosTabla(string &procedure, vector<string> &idNombres,  string &tipoNombre,string &claseParam );
+   void comprobarParametros(string &procedure, vector<string> &idNombres);
+
    Codigo codigo;
    PilaTablaSimbolos stPila;
+   string procedureActual;
 %}
 
 /* 
@@ -82,9 +87,8 @@
 %%
 
 programa : RPROGRAM TID {codigo.anadirInstruccion(*$1 + " " + *$2 + ";");}
-            bloqueppl {codigo.anadirInstruccion("halt;");
-                      codigo.escribir();
-                      }
+            bloqueppl
+            {codigo.anadirInstruccion("halt;");codigo.escribir();}
          ;
 
 bloqueppl :  TLLAVEA 
@@ -101,9 +105,7 @@ bloque : TLLAVEA declaraciones lista_de_sentencias TLLAVEC { $$ = new sentencias
             ;
 
 declaraciones :   tipo lista_de_ident TSEMIC { codigo.anadirDeclaraciones(*$2 , *$1);
-                                                TablaSimbolos tabla = stPila.desempilar();
-                                                tabla = anadirVariablesTabla(*$2, *$1, tabla);
-                                                stPila.empilar(tabla);
+                                                anadirVariablesTabla(*$2, *$1);
                                                  } declaraciones
                   | /*vacio*/
                   ;
@@ -125,11 +127,13 @@ decl_de_subprogs : decl_de_subprograma decl_de_subprogs
             ;
 
 decl_de_subprograma :   RPROC TID {codigo.anadirInstruccion(*$1 +" "+ *$2);}
-                          {TablaSimbolos stPadre = stPila.desempilar();
-                          stPadre.anadirProcedimiento(*$2);
-                          stPila.empilar(stPadre);
+                          {
+                          stPila.tope().anadirProcedimiento(*$2);
+                          procedureActual = *$2;
+                          //stPila.tope().print();
                           TablaSimbolos st;
-                          stPila.empilar(st);}
+                          stPila.empilar(st);
+                          }
 
                           argumentos
                           bloqueppl
@@ -142,13 +146,17 @@ argumentos :TPARA lista_de_param TPARC
             | /*vacio*/
             ;
 
-lista_de_param : tipo lista_de_ident TCOL clase_par {codigo.anadirParametros(*$2, *$4, *$1 ); } 
+lista_de_param : tipo lista_de_ident TCOL clase_par
 
-                {TablaSimbolos st;
-                 st = stPila.desempilar();
-                 // DE MOMENTO LAS AÑADO COMO VARIABLES NORMALES
-                 st = anadirVariablesTabla(*$2, *$1, st);
-                 stPila.empilar(st);}
+                { codigo.anadirParametros(*$2, *$4, *$1);
+                 // Se declaran las variables y se le unen al procedure en cuestión
+                 anadirParametrosTabla(procedureActual, *$2, *$1, *$4);
+
+                  // COMPROBACION SI METE BIEN LOS PARÁMETROS
+                  // TablaSimbolos st = stPila.desempilar();
+                  // cout << stPila.tope().numArgsProcedimiento(procedureActual);
+                  // stPila.empilar(st);
+                 }
                 resto_lis_de_param   ;
 
 clase_par : RIN   { $$ = new std::string("in");}
@@ -156,7 +164,12 @@ clase_par : RIN   { $$ = new std::string("in");}
       | RINOUT    { $$ = new std::string("in out");}
       ;
 
-resto_lis_de_param :    TSEMIC tipo lista_de_ident TCOL clase_par {codigo.anadirParametros(*$3, *$5, *$2);} resto_lis_de_param
+resto_lis_de_param :    TSEMIC tipo lista_de_ident TCOL clase_par 
+                        {codigo.anadirParametros(*$3, *$5, *$2);
+                        // Se declaran las variables y se le unen al procedure en cuestión
+                        anadirParametrosTabla(procedureActual, *$3, *$2, *$5);
+                        } 
+                        resto_lis_de_param
                         | /*vacio*/ 
                         ;
 
@@ -196,7 +209,6 @@ sentencia : variable TASSIG expresion TSEMIC {
 					          codigo.completarInstrucciones($7->exits, $8+1);
 					          $$->exits.clear();
                     $$->exits = $11->exits;
-
                     delete $4 ;}
       | REXITIF expresion TSEMIC { 
                $$ = new sentenciastruct;
@@ -213,16 +225,15 @@ sentencia : variable TASSIG expresion TSEMIC {
 											codigo.anadirInstruccion("writeln;");}
       
       | RFOR TPARA tipo variable 
-                          { TablaSimbolos st = stPila.desempilar();
+                          { 
                           try{
-                            st.anadirVariable(*$4,*$3);
+                            stPila.tope().anadirVariable(*$4,*$3);
                           }
                           catch(string err){
                             const char *cstr = err.c_str();
                             yyerror(cstr);
                           }
-                          codigo.anadirInstruccion(*$3+" "+*$4+";");
-                          stPila.empilar(st);}
+                          codigo.anadirInstruccion(*$3+" "+*$4+";");}
       TASSIG expresion {codigo.anadirInstruccion(*$4+" "+*$6+" "+$7->str);} TSEMIC
       M expresion TSEMIC M sentencia M {codigo.anadirInstruccion("goto");}  TPARC RLOOP bloque M TSEMIC
                       {$$ = new sentenciastruct;
@@ -244,9 +255,24 @@ sentencia : variable TASSIG expresion TSEMIC {
 					                $$->exits.clear();
                         }
                       }
-
+      // Llamadas a procedures
+      | TID TPARA variable resto_lista_id TPARC TSEMIC
+      { stPila.tope().print();
+        $$ = new sentenciastruct;
+        vector<string> tmp1 ; tmp1.push_back(*$3) ;
+        if ($4->size() > 0)
+          tmp1 = *unirStr(*$4,tmp1); // variable, variable_resto1, variable_resto2
+        try{
+          TablaSimbolos st;
+          stPila.verificarNumArgs(*$1, tmp1.size());
+          comprobarParametros(*$1, tmp1);
+          }
+          catch (string err) {
+            const char *cstr = err.c_str();
+            yyerror(cstr);
+          }
+      }
       ;
-
 
 M : { $$ = codigo.obtenRef(); }
 	;
@@ -348,11 +374,45 @@ vector<int> *unir(vector<int> lis1, vector<int> lis2){
         return nueva;
 }
 
-TablaSimbolos anadirVariablesTabla(vector<string> &idNombres,  string &tipoNombre, TablaSimbolos &tabla) {
+vector<string> *unirStr(vector<string> lis1, vector<string> lis2){
+        vector<string> *nueva;
+        nueva = new vector<string>(lis1);
+
+        nueva->insert(nueva->end(), lis2.begin(), lis2.end());
+
+        return nueva;
+}
+
+void anadirVariablesTabla(vector<string> &idNombres,  string &tipoNombre) {
   vector<string>::const_iterator iter;
   for (iter=idNombres.end()-1; iter!=idNombres.begin()-1; iter--) {
-    //anadirInstruccion(tipoNombre + " " + *iter + ";");
-    tabla.anadirVariable(*iter, tipoNombre);
+    cout << "Variable añadida:" << *iter << "\n";
+    stPila.tope().anadirVariable(*iter, tipoNombre);
   }
-  return tabla;
+}
+
+void anadirParametrosTabla(string &procedure, vector<string> &idNombres,  string &tipoNombre,string &claseParam ) {
+  vector<string>::const_iterator iter;
+  for (iter=idNombres.end()-1; iter!=idNombres.begin()-1; iter--) {
+    // Imprimir todo actual
+    try{
+    stPila.anadirParametro(procedure, *iter, claseParam, tipoNombre);
+    }catch(string error){}
+     cout << "Procedure: " << procedure << " Var: "<< *iter << " clase: "<< claseParam << " tipo: " << tipoNombre << "\n";    
+  }
+}
+
+void comprobarParametros(string &procedure, vector<string> &idNombres) {
+  vector<string>::const_iterator iter;
+  pair<string, string> tipos;
+  string tipo;
+  int i;
+  for (iter=idNombres.end()-1,i = 0; iter!=idNombres.begin()-1; iter--, i++) {
+    //anadirInstruccion(tipoNombre + " " + *iter + ";");
+    tipos = stPila.obtenerTiposParametro(procedure, i);
+    tipo = stPila.obtenerTipo(*iter);
+    if (tipo.compare(tipos.second) != 0){
+      throw string("Error semántico. El parámetro número "+to_string(i+1)+" es de tipo "+tipo+" y debería ser de tipo "+tipos.second);
+    }
+  }
 }

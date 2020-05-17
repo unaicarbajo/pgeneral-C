@@ -11,7 +11,6 @@ prog ejemplo4 {
      }
 
      proc restar( int x,y: in; int resul:in out) {
-        int i;
         for (int i = 2 ; a < 2 ; i = i + 1;) loop
         { aux = 4;
             };

@@ -1,0 +1,18 @@
+prog ejemplo4 {
+     int i, y;
+     int resul;
+     proc sumar ( int x: in; int y: in; int resul: in out) {
+
+        for (int i = 2 ; a < 2 ; i = i + 1;) loop
+        { aux = 4;
+            };
+     }
+     proc restar ( int x: in; int y: in; int resul: in out) {
+        for (int i = 2 ; a < 2 ; i = i + 1;) loop
+        { aux = 4;
+            };
+     }
+
+     sumar(i,y,resul);
+
+}

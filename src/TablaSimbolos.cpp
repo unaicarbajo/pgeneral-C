@@ -112,3 +112,22 @@ bool TablaSimbolos::existeId(string id) {
 void TablaSimbolos::borrarId(string id) {
 	tabla.erase(id);
 }
+
+/************/
+/* ultimaKey*/
+/************/
+
+string TablaSimbolos::ultimaKey() {
+	return tabla.rbegin()->first;
+}
+
+
+void TablaSimbolos::print() {
+	printf("Tabla actual: \n");
+	for(std::map<std::string, InfoSimbolo>::const_iterator it = tabla.begin();
+	it != tabla.end(); ++it)
+	{
+		printf(it->first.c_str());
+		printf("\n");
+	}
+}
