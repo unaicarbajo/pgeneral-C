@@ -5,8 +5,10 @@
 
 prog ejemplo4 {
      proc sumar ( int x,y: in; int resul:in out) {
+         int i;
         for (int i = 2 ; a < 2 ; i = i + 1;) loop
-        { aux = 4;
+        {   int i;
+            aux = 4;
             };
      }
 

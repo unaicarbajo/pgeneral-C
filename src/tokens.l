@@ -88,7 +88,6 @@ not                     TOKEN(TNOT);
 
 [ \t\n]                 ;
 
-
 .                       { cout << "Token desconocido: " << yytext << endl; yyterminate();}
 %%
 

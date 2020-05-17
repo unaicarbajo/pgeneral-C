@@ -107,7 +107,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 45 "parser.y" /* yacc.c:1921  */
+#line 47 "parser.y" /* yacc.c:1921  */
 
     string *str ;
     expresionstruct *expr ;

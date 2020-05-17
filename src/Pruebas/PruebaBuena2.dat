@@ -7,7 +7,7 @@
 # continua o no.
 
 prog ejemplo2 {
-    proc sumar (int resul:in out; int prueba: in out) {
+    proc sumar (int resul:in out) {
         int aux;
         aux = x;
         while aux /= 0 loop {

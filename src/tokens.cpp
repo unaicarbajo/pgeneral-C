@@ -1080,12 +1080,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 92 "tokens.l"
+#line 91 "tokens.l"
 { cout << "Token desconocido: " << yytext << endl; yyterminate();}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 93 "tokens.l"
+#line 92 "tokens.l"
 ECHO;
 	YY_BREAK
 #line 1092 "tokens.cpp"
@@ -2064,7 +2064,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 93 "tokens.l"
+#line 92 "tokens.l"
 
 
 
