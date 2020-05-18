@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+
 using namespace std;
 
 
@@ -44,10 +45,8 @@ void PilaTablaSimbolos::empilar(const TablaSimbolos& st) {
 /* desempilar */
 /**************/
 
-TablaSimbolos& PilaTablaSimbolos::desempilar() {
-	TablaSimbolos& tope = this->tope();
+void PilaTablaSimbolos::desempilar() {
 	pila.pop();
-	return tope;
 }
 
 

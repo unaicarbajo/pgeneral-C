@@ -31,7 +31,7 @@
    vector<int> *unir(vector<int> lis1, vector<int> lis2);
    vector<string> *unirStr(vector<string> lis1, vector<string> lis2);
    void anadirVariablesTabla(vector<string> &idNombres, string &tipoNombre);
-   void anadirParametrosTabla(string &procedure, vector<string> &idNombres,  string &tipoNombre,string &claseParam );
+   void anadirParametrosTabla(vector<string> &idNombres,  string &tipoNombre,string &claseParam );
    void comprobarParametros(string &procedure, vector<string> &idNombres);
    void imprimirLlamada(string &procedure, vector<string> &idNombres);
 
@@ -88,19 +88,23 @@
 
 %%
 
-programa : RPROGRAM TID {codigo.anadirInstruccion(*$1 + " " + *$2 + ";");}
+programa : RPROGRAM TID {codigo.anadirInstruccion(*$1 + " " + *$2 + ";");
+            TablaSimbolos st;
+            st.anadirVariable(*$2,"programa");
+            stPila.empilar(st);
+            }
             bloqueppl
-            {codigo.anadirInstruccion("halt;");codigo.escribir();}
+            { // VVVVVV AQUI VVVV
+              stPila.desempilar();
+            codigo.anadirInstruccion("halt;");codigo.escribir();}
          ;
 
-bloqueppl :  TLLAVEA 
-            {TablaSimbolos st;
-            stPila.empilar(st);}
+bloqueppl :  TLLAVEA
             declaraciones
             decl_de_subprogs
 	          lista_de_sentencias
 	          TLLAVEC
-            {stPila.desempilar();}
+            
           ;
 
 bloque : TLLAVEA declaraciones lista_de_sentencias TLLAVEC 
@@ -137,14 +141,17 @@ decl_de_subprograma :   RPROC TID {codigo.anadirInstruccion(*$1 +" "+ *$2);}
                           {
                           stPila.tope().anadirProcedimiento(*$2);
                           procedureActual = *$2;
-                          //stPila.tope().print();
                           TablaSimbolos st;
                           stPila.empilar(st);
                           }
 
                           argumentos
                           bloqueppl
-                         {codigo.anadirInstruccion("endproc;");
+
+                         {
+                           codigo.anadirInstruccion("endproc;");
+                           
+
                          stPila.desempilar();}
                      ;
 
@@ -156,18 +163,18 @@ lista_de_param : tipo lista_de_ident TCOL clase_par
 
                 { codigo.anadirParametros(*$2, *$4, *$1);
                  // Se declaran las variables y se le unen al procedure en cuestión
-                 try{anadirParametrosTabla(procedureActual, *$2, *$1, *$4);}
+                 try{
+                   anadirParametrosTabla(*$2, *$1, *$4);
+                   }
                  catch (string err){
                     const char *cstr = err.c_str();
                     yyerror(cstr);
                   }
+                  //delete $2; delete $4;
 
-                  // COMPROBACION SI METE BIEN LOS PARÁMETROS
-                  // TablaSimbolos st = stPila.desempilar();
-                  // cout << stPila.tope().numArgsProcedimiento(procedureActual);
-                  // stPila.empilar(st);
                  }
                 resto_lis_de_param   ;
+                        ;
 
 clase_par : RIN   { $$ = new std::string("in");}
       | ROUT      { $$ = new std::string("out");}
@@ -177,7 +184,8 @@ clase_par : RIN   { $$ = new std::string("in");}
 resto_lis_de_param :    TSEMIC tipo lista_de_ident TCOL clase_par 
                         {codigo.anadirParametros(*$3, *$5, *$2);
                         // Se declaran las variables y se le unen al procedure en cuestión
-                        try{anadirParametrosTabla(procedureActual, *$3, *$2, *$5);}
+                        try{
+                          anadirParametrosTabla(*$3, *$2, *$5);}
                         catch (string err){
                           const char *cstr = err.c_str();
                           yyerror(cstr);
@@ -407,14 +415,14 @@ void anadirVariablesTabla(vector<string> &idNombres,  string &tipoNombre) {
   }
 }
 
-void anadirParametrosTabla(string &procedure, vector<string> &idNombres,  string &tipoNombre,string &claseParam ) {
+void anadirParametrosTabla(vector<string> &idNombres,  string &tipoNombre,string &claseParam ) {
   vector<string>::const_iterator iter;
   for (iter=idNombres.end()-1; iter!=idNombres.begin()-1; iter--) {
     // Imprimir todo actual
     try{
-    stPila.anadirParametro(procedure, *iter, claseParam, tipoNombre);
+    stPila.anadirParametro(procedureActual, *iter, claseParam, tipoNombre);
     }catch(string error){}
-     cout << "Procedure: " << procedure << " Var: "<< *iter << " clase: "<< claseParam << " tipo: " << tipoNombre << "\n";    
+     cout << "Procedure: " << procedureActual << " Var: "<< *iter << " clase: "<< claseParam << " tipo: " << tipoNombre << "\n";    
   }
 }
 

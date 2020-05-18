@@ -49,8 +49,8 @@ public:
          * el elemento en el tope en ese momento. */
 	void empilar(const TablaSimbolos& st);
 
-	/* Borra de la pila el elemento del tope y lo devuelve. */
-	TablaSimbolos& desempilar();
+	/* Borra de la pila el elemento del tope. */
+	void desempilar();
 
 	/* Dada una variable, intenta encontrar su tipo empezando desde la tabla de símbolos en el
 	 * tope de la pila y lo devuelve, si lo encuentra. */
@@ -70,6 +70,7 @@ public:
 	/* Verifica que el número de argumentos del procedimiento proc es numArgs. Si no coincide
 	 * eleva una excepción. */
 	void verificarNumArgs(std::string proc, int numArgs);
+
 
 };
 
