@@ -26,6 +26,6 @@ prog ejemplo {
     read(a);
     read(b);
     d= 1/b;
-    sumar(a,b,c); (* los que hagan llamadas a procedimientos *)
+    #sumar(a,b,c); (* los que hagan llamadas a procedimientos *)
     c= c*(c*d)+e;
 }
